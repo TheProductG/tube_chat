@@ -1,4 +1,5 @@
-﻿fastapi
+# Required packages for TubeChat AI
+fastapi
 uvicorn
 youtube-transcript-api
 openai
