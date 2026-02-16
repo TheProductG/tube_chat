@@ -9,3 +9,4 @@ sqlalchemy
 pinecone
 numpy
 psycopg2-binary
+aiofiles

@@ -114,3 +114,7 @@ async def chat_about_video(request: ChatRequest):
         return {"answer": answer}
     except Exception as e:
         return {"answer": f"Error: {str(e)}"}
+
+# Serve static files for the frontend (Crucial for Render/Railway/HF)
+from fastapi.staticfiles import StaticFiles
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
