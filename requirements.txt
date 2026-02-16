@@ -1,0 +1,10 @@
+﻿fastapi
+uvicorn
+youtube-transcript-api
+openai
+python-dotenv
+yt-dlp
+sqlalchemy
+pinecone
+numpy
+psycopg2-binary

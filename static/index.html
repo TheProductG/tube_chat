@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TubeChat AI | Video Summarizer & Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"
+                        fill="#FF0000" />
+                    <path d="m9.75 15.02 5.75-3.27-5.75-3.27v6.54z" fill="#fff" />
+                </svg>
+                <h1>TubeChat AI</h1>
+            </div>
+            <div class="url-input-container">
+                <div class="input-group">
+                    <input type="text" id="youtube-url" placeholder="Paste YouTube link here..." autocomplete="off">
+                    <button id="analyze-btn">Summarize</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div id="loader" class="loader hidden">
+                <div class="spinner"></div>
+                <p>Analyzing Video Subtitles...</p>
+            </div>
+
+            <div id="content-grid" class="content-grid hidden">
+                <!-- Left Sidebar: Summary -->
+                <aside class="summary-section">
+                    <div class="section-header">
+                        <h3>📋 Video Summary</h3>
+                    </div>
+                    <div id="summary-content" class="summary-content">
+                        <!-- Summary injected here -->
+                    </div>
+                </aside>
+
+                <!-- Right Main: Chat -->
+                <section class="chat-section">
+                    <div class="section-header">
+                        <h3>💬 Ask Questions</h3>
+                    </div>
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="message bot-message">
+                            <div class="bubble">I've analyzed the video! Ask me any specific question about the content.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="user-input" placeholder="Ask about the video...">
+                        <button id="send-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by OpenAI GPT-4o & yt-dlp</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

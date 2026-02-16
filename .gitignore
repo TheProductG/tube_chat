@@ -1,0 +1,13 @@
+.env
+*.db
+*.bin
+*.json
+__pycache__/
+*.pyc
+.vscode/
+node_modules/
+dist/
+chroma_db/
+faiss_index.bin
+transcript_chunks.json
+videos.db
