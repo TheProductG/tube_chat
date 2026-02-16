@@ -69,14 +69,14 @@ async def analyze_video(request: AnalyzeRequest, db: Session = Depends(get_db)):
     # Generate summary
     summary = generate_summary(transcript)
     
-    # Index in Local ChromaDB (RAG)
+    # Index in Pinecone (RAG)
     try:
         chunks = chunk_text(transcript)
         embeddings = get_embeddings(chunks)
         vector_db.index_transcript(video_id, chunks, embeddings)
-        print(f"Indexed {len(chunks)} chunks for {video_id} in ChromaDB")
+        print(f"Indexed {len(chunks)} chunks for {video_id} in Pinecone")
     except Exception as e:
-        print(f"Failed to index in ChromaDB: {e}")
+        print(f"Failed to index in Pinecone: {e}")
 
     # Save to SQLite for fast metadata access
     new_video = Video(video_id=video_id, transcript=transcript, summary=summary)
@@ -92,14 +92,14 @@ async def analyze_video(request: AnalyzeRequest, db: Session = Depends(get_db)):
 
 @app.post("/chat")
 async def chat_about_video(request: ChatRequest):
-    # Use Local RAG with ChromaDB
+    # Use RAG with Pinecone
     try:
         # 1. Get embedding for the user's question
         query_embeddings = get_embeddings([request.question])
         if not query_embeddings:
             raise Exception("Failed to generate embedding for question")
             
-        # 2. Search relevant chunks in ChromaDB
+        # 2. Search relevant chunks in Pinecone
         context_chunks = vector_db.search_chunks(query_embeddings[0], request.video_id)
         
         if not context_chunks:
