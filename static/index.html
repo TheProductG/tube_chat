@@ -31,7 +31,12 @@
                 <div class="input-group">
                     <input type="text" id="youtube-url" placeholder="Paste YouTube link here..." autocomplete="off">
                     <button id="analyze-btn">Summarize</button>
+                    <button id="upload-btn" class="upload-btn" title="Upload pre-fetched transcript">📤 Upload</button>
+                    <input type="file" id="file-input" accept=".json" style="display: none;">
                 </div>
+                <p class="upload-hint">💡 Can't fetch transcript? <a
+                        href="https://github.com/TheProductG/tube_chat#local-transcript-fetching"
+                        target="_blank">Download the local script</a></p>
             </div>
         </header>
 

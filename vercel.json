@@ -1,0 +1,22 @@
+{
+    "builds": [
+        {
+            "src": "main.py",
+            "use": "@vercel/python"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/analyze",
+            "dest": "main.py"
+        },
+        {
+            "src": "/chat",
+            "dest": "main.py"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "static/$1"
+        }
+    ]
+}

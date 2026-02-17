@@ -153,6 +153,43 @@ header {
     transform: scale(1.02);
 }
 
+.upload-btn {
+    background: rgba(59, 130, 246, 0.8);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-btn:hover {
+    background: rgba(59, 130, 246, 1);
+    transform: scale(1.02);
+}
+
+.upload-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.upload-hint {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+.upload-hint a {
+    color: #60a5fa;
+    text-decoration: none;
+}
+
+.upload-hint a:hover {
+    text-decoration: underline;
+}
+
 main {
     flex: 1;
     overflow: hidden;

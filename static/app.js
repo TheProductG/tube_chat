@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const youtubeUrlInput = document.getElementById('youtube-url');
     const analyzeBtn = document.getElementById('analyze-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileInput = document.getElementById('file-input');
     const loader = document.getElementById('loader');
     const contentGrid = document.getElementById('content-grid');
     const summaryContent = document.getElementById('summary-content');
@@ -11,6 +13,69 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTranscript = '';
     let currentVideoId = '';
     let chatHistory = [];
+
+    // Upload Transcript Handler
+    uploadBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        uploadBtn.disabled = true;
+        uploadBtn.innerText = '📤 Uploading...';
+        loader.classList.remove('hidden');
+        contentGrid.classList.add('hidden');
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/upload-transcript', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Failed to upload transcript');
+            }
+
+            currentTranscript = data.transcript;
+            currentVideoId = data.video_id;
+
+            // Format Summary
+            let summaryHTML = formatMarkdown(data.summary);
+            if (data.cached) {
+                summaryHTML = `<div class="cache-badge">Cached Analysis</div>` + summaryHTML;
+            }
+            summaryContent.innerHTML = summaryHTML;
+
+            // Show interface
+            loader.classList.add('hidden');
+            contentGrid.classList.remove('hidden');
+
+            // Initial msg
+            chatMessages.innerHTML = `
+                <div class="message bot-message">
+                    <div class="bubble">✅ ${data.message} Feel free to ask me anything about the video!</div>
+                </div>
+            `;
+            chatHistory = [];
+
+            // Clear file input
+            fileInput.value = '';
+
+        } catch (error) {
+            alert(error.message);
+            loader.classList.add('hidden');
+        } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.innerText = '📤 Upload';
+        }
+    });
 
     // Analyze Video
     analyzeBtn.addEventListener('click', async () => {

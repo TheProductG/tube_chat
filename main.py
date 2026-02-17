@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
+import json
 from sqlalchemy.orm import Session
 from services.youtube import extract_video_id, get_transcript
 from services.openai_service import (
@@ -49,9 +50,79 @@ class ChatRequest(BaseModel):
     question: str
     history: List[dict]
 
+class UploadTranscriptRequest(BaseModel):
+    video_id: str
+    url: str
+    transcript: str
+
 @app.get("/api/health")
 def health_check():
     return {"status": "ok"}
+
+@app.post("/upload-transcript")
+async def upload_transcript(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """
+    Upload a pre-fetched transcript JSON file.
+    Use the local fetch_transcript_local.py script to generate this file.
+    """
+    try:
+        # Read the uploaded file
+        contents = await file.read()
+        data = json.loads(contents.decode('utf-8'))
+        
+        video_id = data.get('video_id')
+        transcript = data.get('transcript')
+        url = data.get('url', f"https://www.youtube.com/watch?v={video_id}")
+        
+        if not video_id or not transcript:
+            raise HTTPException(status_code=400, detail="Invalid transcript file. Must contain 'video_id' and 'transcript'.")
+        
+        # Check if already exists
+        try:
+            cached_video = db.query(Video).filter(Video.video_id == video_id).first()
+            if cached_video:
+                return {
+                    "video_id": video_id,
+                    "transcript": cached_video.transcript,
+                    "summary": cached_video.summary,
+                    "cached": True,
+                    "message": "This video was already analyzed."
+                }
+        except Exception as e:
+            print(f"DB Query error: {e}")
+        
+        # Generate summary
+        summary = generate_summary(transcript)
+        
+        # Index in vector DB
+        try:
+            if os.getenv("PINECONE_API_KEY"):
+                chunks = chunk_text(transcript)
+                embeddings = get_embeddings(chunks)
+                vector_db.index_transcript(video_id, chunks, embeddings)
+        except Exception as e:
+            print(f"Indexing error: {e}")
+        
+        # Save to database
+        try:
+            new_video = Video(video_id=video_id, transcript=transcript, summary=summary)
+            db.add(new_video)
+            db.commit()
+        except Exception as e:
+            print(f"DB Save error: {e}")
+        
+        return {
+            "video_id": video_id,
+            "transcript": transcript,
+            "summary": summary,
+            "cached": False,
+            "message": "Transcript uploaded and analyzed successfully!"
+        }
+        
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON file.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing transcript: {str(e)}")
 
 @app.post("/analyze")
 async def analyze_video(request: AnalyzeRequest, db: Session = Depends(get_db)):
