@@ -33,5 +33,5 @@ RUN mkdir -p /tmp/videos && chmod 777 /tmp/videos
 EXPOSE 7860
 
 # Command to run the application
-# We use --port 7860 because that is the Hugging Face default
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
+# Railway provides PORT dynamically, fallback to 7860 for HF
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}
