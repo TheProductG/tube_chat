@@ -1,5 +1,5 @@
-# Use the official Python image
-FROM python:3.14-slim
+# Use a stable Python version
+FROM python:3.12-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -8,12 +8,13 @@ ENV PORT=7860
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies for yt-dlp and psycopg2
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libpq-dev \
     gcc \
     curl \
+    gnupg \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
