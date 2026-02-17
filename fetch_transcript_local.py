@@ -18,16 +18,16 @@ def main():
     video_id = extract_video_id(url)
     
     if not video_id:
-        print(f"❌ Invalid YouTube URL: {url}")
+        print(f"[ERROR] Invalid YouTube URL: {url}")
         sys.exit(1)
     
-    print(f"📹 Video ID: {video_id}")
-    print(f"🔍 Fetching transcript...")
+    print(f"[INFO] Video ID: {video_id}")
+    print(f"[INFO] Fetching transcript...")
     
     transcript = get_transcript(video_id)
     
     if not transcript:
-        print("❌ Failed to fetch transcript. Make sure the video has captions/subtitles.")
+        print("[ERROR] Failed to fetch transcript. Make sure the video has captions/subtitles.")
         sys.exit(1)
     
     # Save to JSON file
@@ -41,9 +41,9 @@ def main():
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"✅ Success! Transcript saved to: {output_file}")
-    print(f"📊 Transcript length: {len(transcript)} characters")
-    print(f"\n💡 Next steps:")
+    print(f"[SUCCESS] Transcript saved to: {output_file}")
+    print(f"[INFO] Transcript length: {len(transcript)} characters")
+    print(f"\n[NEXT STEPS]")
     print(f"   1. Go to your TubeChat AI web app")
     print(f"   2. Click 'Upload Transcript'")
     print(f"   3. Select the file: {output_file}")
