@@ -32,6 +32,9 @@ RUN mkdir -p /tmp/videos && chmod 777 /tmp/videos
 # Expose the port Hugging Face Spaces expects (7860)
 EXPOSE 7860
 
+# Make startup script executable
+RUN chmod +x start.sh
+
 # Command to run the application
-# Railway provides PORT dynamically, fallback to 7860 for HF
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}"]
+# Railway provides PORT dynamically. Shell form allows $PORT expansion.
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT
