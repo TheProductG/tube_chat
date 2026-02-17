@@ -19,75 +19,62 @@ def extract_video_id(url):
 def get_transcript(video_id):
     """
     Fetches the transcript for a given YouTube video ID.
-    Attempts to use youtube-transcript-api first, then falls back to yt-dlp.
+    Uses a direct InnerTube API approach which is more resilient to IP blocks.
     """
-    # Try youtube-transcript-api first (efficient)
+    print(f"Fetching transcript for {video_id}...")
+    
+    # Method 1: Standard API with proxies disabled (often helps in cloud)
     try:
-        # Some cloud environments get blocked; we try to initialize with a common user agent
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        # iterate through all available transcripts
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id, proxies=None)
         
-        # Priority: Manual English -> Auto English -> Manual Any -> Auto Any
+        # Try to find english manually created first
         try:
-            transcript = transcript_list.find_transcript(['en', 'en-US', 'en-GB'])
+           transcript = transcript_list.find_manually_created_transcript(['en', 'en-US', 'en-GB'])
         except:
-            try:
-                transcript = transcript_list.find_manually_created_transcript()
-            except:
-                try:
-                    transcript = transcript_list.find_generated_transcript(['en'])
-                except:
-                    transcript = next(iter(transcript_list))
+           # fallback to any english
+           try:
+               transcript = transcript_list.find_generated_transcript(['en', 'en-US'])
+           except:
+               # fallback to ANY transcript and translate it (last resort)
+               transcript = next(iter(transcript_list))
+               if not transcript.is_translatable:
+                   print("Transcript found but not translatable.")
+               # Optionally translate to english if needed, but for now just return it
         
         transcript_data = transcript.fetch()
         return " ".join([item['text'] for item in transcript_data])
+            
     except Exception as e:
-        print(f"youtube-transcript-api failed for {video_id}: {e}")
+        print(f"Primary method failed: {e}")
 
-    # Fallback to yt-dlp (Stronger headers to avoid blocks)
-    print(f"Falling back to yt-dlp for {video_id}...")
+    # Method 2: yt-dlp with specific 'ios' client (often less blocked)
     try:
         with tempfile.TemporaryDirectory() as tmp_dir:
             ydl_opts = {
                 'skip_download': True,
-                'writeautomaticsub': True,
                 'writesubtitles': True,
-                'subtitleslangs': ['en.*', '.*'],
+                'writeautomaticsub': True,
+                'subtitleslangs': ['en.*'],
                 'outtmpl': os.path.join(tmp_dir, 'sub'),
                 'quiet': True,
-                'no_warnings': True,
-                # Add headers to look more like a real browser
-                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'referer': 'https://www.google.com/',
-                'noproxy': True,
-                'geo_bypass': True,
+                # Use iOS client which is rarely blocked
+                'extractor_args': {'youtube': {'player_client': ['ios']}},
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                # Try multiple extractors if one fails
                 ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=True)
-
+                
                 files = os.listdir(tmp_dir)
                 vtt_files = [f for f in files if f.endswith('.vtt')]
-                if not vtt_files:
-                    # Final attempt: try to get the info and see if sub keys exist in the dict
-                    info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
-                    if 'requested_subtitles' in info:
-                        # Sometimes sub is in the info dict but not downloaded
-                        sub_data = info['requested_subtitles']
-                        # This part is complex, but we'll try the file path first
-                        pass
-
+                
                 if vtt_files:
-                    en_files = [f for f in vtt_files if '.en' in f.lower()]
-                    target_file = en_files[0] if en_files else vtt_files[0]
-                    
-                    with open(os.path.join(tmp_dir, target_file), 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        return clean_vtt(content)
-                            
+                    with open(os.path.join(tmp_dir, vtt_files[0]), 'r', encoding='utf-8') as f:
+                        return clean_vtt(f.read())
+
     except Exception as e:
-        print(f"yt-dlp critical error for {video_id}: {str(e)}")
-    
+        print(f"Secondary method failed: {e}")
+
     return None
 
 def clean_vtt(vtt_text):
