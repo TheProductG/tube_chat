@@ -10,3 +10,4 @@ pinecone
 numpy
 psycopg2-binary
 aiofiles
+python-multipart
