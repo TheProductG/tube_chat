@@ -34,4 +34,4 @@ EXPOSE 7860
 
 # Command to run the application
 # Railway provides PORT dynamically, fallback to 7860 for HF
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}"]
