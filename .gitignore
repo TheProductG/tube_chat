@@ -2,6 +2,8 @@
 *.db
 *.bin
 *.json
+!railway.json
+!vercel.json
 __pycache__/
 *.pyc
 .vscode/
